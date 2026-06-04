@@ -18,6 +18,7 @@ Variables d'environnement
 -------------------------
 Créez un fichier `.env` et définissez au minimum :
 
+``` python
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_db_password
@@ -25,6 +26,7 @@ DB_NAME=travel_planner
 DB_PORT=3306
 JWT_SECRET_KEY=change_me
 OPENWEATHER_API_KEY=your_openweather_key
+```
 
 Base de données
 ---------------
