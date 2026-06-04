@@ -111,14 +111,13 @@ Ouvrez le fichier `index.html` dans un navigateur (ou servez‑le) ; il envoie d
 
 Remarques et maintenance
 ------------------------
-- Les données utilisateur sont maintenant stockées en MySQL via SQLAlchemy (`app/storage/db.py`).
-- Le stockage CSV (`app/storage/csv_store.py`) est obsolète et peut être supprimé si vous n'en avez plus besoin.
+- Les données utilisateur sont stockées en MySQL via SQLAlchemy (`app/storage/db.py`).
 - Assurez‑vous que `OPENWEATHER_API_KEY` est défini pour que la route `/plan` renvoie la météo.
 - Si vous ajoutez des activités en base, enregistrez `city` en minuscules (ou adaptez la requête dans `app/storage/db.py`).
 
 Initialiser la base et peupler `activities`
 ------------------------------------------
-Le fichier `app/services/schema.sql` contient la création de la base `travel_planner`, les tables `users` et `activities`, ainsi qu'un lot d'inserts par défaut pour `activities` (dont `city = 'default'`). Le script utilise `INSERT IGNORE` et un index unique `(city, activity_name)` pour éviter les doublons.
+Le fichier `app/services/schema.sql` contient la création de la base `travel_planner`, les tables `users` et `activities`, ainsi qu'un lot d'inserts par défaut pour `activities` (dont `city = 'default'`).
 
 Pour exécuter le script avec le client MySQL :
 
