@@ -142,7 +142,3 @@ USE travel_planner;
 SELECT COUNT(*) FROM activities;
 SELECT activity_name FROM activities WHERE city = 'paris';
 ```
-
-Support
--------
-Pour toute question, ouvrez une issue ou contactez le mainteneur.
