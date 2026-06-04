@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Travel Planner</title>
+    <style>
+        body { font-family: sans-serif; max-width: 500px; margin: 60px auto; padding: 0 20px; }
+        input { width: 100%; padding: 8px; margin: 8px 0; box-sizing: border-box; }
+        button { width: 100%; padding: 10px; background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #1d4ed8; }
+        .error { color: red; margin-top: 8px; }
+        .hidden { display: none; }
+        #results { background: #f1f5f9; padding: 20px; border-radius: 8px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <!-- Screen 1: Auth -->
+    <div id="screen-auth">
+        <h2>Travel Planner</h2>
+        <input type="email" id="email" placeholder="Email" />
+        <input type="password" id="password" placeholder="Password" />
+        <button onclick="login()">Login</button>
+        <button onclick="register()" style="background:#16a34a; margin-top:8px;">Register</button>
+        <p class="error hidden" id="auth-error"></p>
+    </div>
+
+    <!-- Screen 2: Plan -->
+    <div id="screen-plan" class="hidden">
+        <h2>Where are you going?</h2>
+        <input type="text" id="city" placeholder="City name" />
+        <button onclick="plan()">Get my plan</button>
+        <button onclick="logout()" style="background:#dc2626; margin-top:8px;">Logout</button>
+        <p class="error hidden" id="plan-error"></p>
+    </div>
+
+    <!-- Screen 3: Results -->
+    <div id="screen-results" class="hidden">
+        <button onclick="goBack()" style="background:#64748b; margin-bottom:16px;">← Back</button>
+        <div id="results"></div>
+    </div>
+
+<script>
+    let token = null;
+
+    window.onload = function() {
+        const saved = localStorage.getItem("token");
+        if (saved) {
+            token = saved;
+            showScreen("plan");
+        }
+    }
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = msg;
+        el.classList.remove("hidden");
+    }
+
+    function hideError(id) {
+        document.getElementById(id).classList.add("hidden");
+    }
+
+    function showScreen(name) {
+        ["auth", "plan", "results"].forEach(s => {
+            document.getElementById("screen-" + s).classList.add("hidden");
+        });
+        document.getElementById("screen-" + name).classList.remove("hidden");
+    }
+
+    async function register() {
+        hideError("auth-error");
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const res = await fetch("http://localhost:8000/users", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({email, password})
+        });
+
+        if (res.ok) {
+            alert("Account created! You can now log in.");
+        } else {
+            const data = await res.json();
+            showError("auth-error", data.detail || "Registration failed.");
+        }
+    }
+
+    async function login() {
+        hideError("auth-error");
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        const res = await fetch("http://localhost:8000/login", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({email, password})
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            token = data.access_token;
+            localStorage.setItem("token", token);
+            showScreen("plan");
+        } else {
+            showError("auth-error", data.detail || "Login failed.");
+        }
+    }
+
+    function logout() {
+        token = null;
+        localStorage.removeItem("token");
+        showScreen("auth");
+    }
+
+    async function plan() {
+        hideError("plan-error");
+        const city = document.getElementById("city").value;
+
+        const res = await fetch("http://localhost:8000/plan", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
+            body: JSON.stringify({city})
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+            document.getElementById("results").innerHTML = `
+                <h3>📍 ${data.city}</h3>
+                <p>🌡️ <strong>${data.weather.temperature_celsius}°C</strong> — ${data.weather.conditions}</p>
+                <h4>Things to do:</h4>
+                <ul>${data.activities.map(a => `<li>${a}</li>`).join("")}</ul>
+            `;
+            showScreen("results");
+        } else {
+            showError("plan-error", data.detail || "Something went wrong.");
+        }
+    }
+
+    function goBack() {
+        showScreen("plan");
+    }
+</script>
+</body>
+</html>
